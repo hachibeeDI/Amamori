@@ -1,0 +1,23 @@
+{
+  "name": "amamori",
+  "version": "0.0.1",
+  "description": "a study of flux",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/hachibeeDI/Amamori.git"
+  },
+  "keywords": [
+    "react",
+    "flux"
+  ],
+  "author": "OGURA_Daiki",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hachibeeDI/Amamori/issues"
+  },
+  "homepage": "https://github.com/hachibeeDI/Amamori#readme"
+}
