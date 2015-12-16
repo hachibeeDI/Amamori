@@ -42,7 +42,7 @@ export default class Store extends EventEmitter {
     });
   }
 
-  publishError(message: string) {
+  publishError(message) {
     this.emit('onError', {data: {message}});
   }
 
@@ -52,7 +52,7 @@ export default class Store extends EventEmitter {
    */
   observe(func) {
     const d = this.dispatcher;
-    func(::d.on);
+    func(d.on.bind(d));
     return this;
   }
 }

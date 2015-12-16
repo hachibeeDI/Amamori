@@ -19,7 +19,7 @@ export default class View extends React.Component {
   observe(store) {
     return {
       on: (func) => {
-        func(::store.on);
+        func(store.on.bind(store));
       }
     }
   }
