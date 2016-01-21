@@ -1,5 +1,9 @@
 import React from 'react';
 
+import debounce from 'lodash/function/debounce';
+
+export {debounce}
+
 
 /**
  * @typedef {StoreObservable} StoreObservable
