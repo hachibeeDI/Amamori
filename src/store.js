@@ -10,20 +10,19 @@ import {clearAuthToken} from './util/auth'
  *   data = '';
  * }
  *
- * class HogeComponent extends React.Component {
+ * class HogeComponent extends Viwe {
  *   constructor(props) {
  *     super(props);
  *     const self = this;
- *     this.store = new HogeStore(HogeDispatcher);
- *     this.store.observe({
- *       toolChanged(targVal) {
- *         if (targVal === this.data) {
- *           self.setState({result: targVal});
- *         }
- *       },
- *       toolExeced(result) {
- *         console.log('aaa');
- *       }
+ *     const store = new HogeStore(HogeDispatcher);
+ *     this
+ *       .observe(store)
+ *       .on(subscribe => {
+ *         subscribe('toolChanged', (targVal) => {
+ *           if (targVal === this.data) {
+ *             self.setState({result: targVal});
+ *           }
+ *         });
  *     });
  *     this.state = {
  *       result: 'result viewer'
