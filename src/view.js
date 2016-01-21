@@ -11,20 +11,27 @@ export {debounce}
  */
 
 
-export default class View extends React.Component {
+export class View extends React.Component {
   constructor(props) {
     super(props);
   }
 
   /**
-   * @param {Store} store The Store you will observe.
+   * @param {Store|Array.<Store>} store The Store you will observe.
    * @returns {StoreObservable}
    */
   observe(store) {
+    if (store.length) {
+      return {
+        on: func => {
+          store.forEach(s => func(s.on.bind(s)))
+        }
+      };
+    }
     return {
-      on: (func) => {
+      on: func => {
         func(store.on.bind(store));
       }
-    }
+    };
   }
 }
