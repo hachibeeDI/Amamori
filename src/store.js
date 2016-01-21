@@ -1,5 +1,8 @@
 import {EventEmitter} from 'events';
 
+import {clearAuthToken} from './util/auth'
+
+
 /**
  * Example:
  *
@@ -39,6 +42,11 @@ export default class Store extends EventEmitter {
     this.dispatcher.on('error', (response) => {
       console.error(response);
       this.emit('onError', response);
+    });
+    this.dispatcher.on('loginSuspend', (e) => {
+      clearAuthToken();
+      window.sessionStorage.setItem('lastLocation', window.location.pathname);
+      this.emit('loginSuspend');
     });
   }
 
