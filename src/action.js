@@ -25,3 +25,57 @@ export function authorizedRequest(baseURL = '/api/', tokenField = 'X-Account-Tok
   }
   return [axios.create({baseURL: baseURL, headers: {[tokenField]: token}}), null];
 }
+
+
+export class Action {
+  _setActionData(data) {
+    this._data = data;
+    return this;
+  }
+  get data() {
+    return this._data;
+  }
+
+  static fromData(data) {
+    const me = new this();
+    me._setActionData(me._fromData(data));
+    return me;
+  }
+  /**
+   * format action data is passed by component.
+   * @returns {object}
+   */
+  _fromData(data) {
+    throw new Error('fromData is not implemented');
+  }
+
+
+  static fromRequest(data) {
+    const me = new this();
+    me._setActionData(me._fromRequest(data));
+    return me;
+  }
+  /**
+   * format action data is passed by ajax request.
+   * @returns {object}
+   */
+  _fromRequest(data) {
+    throw new Error('fromRequest is not implemented');
+  }
+
+  /**
+   * format action data to store
+   * @returns {object}
+   */
+  toData() {
+    return this.data;
+  }
+
+  /**
+   * format action data is passed by component.
+   * @returns {object}
+   */
+  toRequest() {
+    return this.data;
+  }
+}
