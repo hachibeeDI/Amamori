@@ -1,6 +1,6 @@
 {
   "name": "amamori",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "a study of flux",
   "main": "lib/index.js",
   "scripts": {
@@ -31,7 +31,6 @@
   },
   "dependencies": {
     "axios": "^0.9.0",
-    "jwt-decode": "^1.5.1",
-    "lodash": "^4.0.0"
+    "jwt-decode": "^1.5.1"
   }
 }
