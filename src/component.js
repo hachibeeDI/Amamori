@@ -33,7 +33,9 @@ const AmamoriComponentContextTypes = {dispatcher: React.PropTypes.any}
 
 
 export class Component extends ComponentBase {
-  static propTypes = AmamoriComponentContextTypes;
+  static get propTypes() {
+    return AmamoriComponentContextTypes
+  }
 
   static get contextTypes() {
     return AmamoriComponentContextTypes;
@@ -52,6 +54,6 @@ export class AppContextProvider extends ComponentBase {
 
   render() {
     // default implement
-    return <div>{this.props.children}</div>
+    return React.createElement('div', null, this.props.children)
   }
 }
