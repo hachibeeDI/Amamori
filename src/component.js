@@ -8,6 +8,15 @@ import React from 'react';
 
 
 class ComponentBase extends React.Component {
+
+  /**
+   * @param {Class} Store Store's class object
+   * @returns {Store}
+   */
+  createStore(Store) {
+    return new Store(this.props.dispatcher || this.context.dispatcher)
+  }
+
   /**
    * @param {Store|Array.<Store>} store The Store you will observe.
    * @returns {StoreObservable}
