@@ -49,4 +49,9 @@ export class AppContextProvider extends ComponentBase {
   getChildContext() {
     return {dispatcher: this.props.dispatcher};
   }
+
+  render() {
+    // default implement
+    return <div>{this.props.children}</div>
+  }
 }
