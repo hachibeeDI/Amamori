@@ -7,11 +7,7 @@ import React from 'react';
  */
 
 
-export class View extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
+class ViewBase extends React.Component {
   /**
    * @param {Store|Array.<Store>} store The Store you will observe.
    * @returns {StoreObservable}
@@ -29,5 +25,26 @@ export class View extends React.Component {
         func(store.on.bind(store));
       }
     };
+  }
+}
+
+
+const AmamoriViewContextTypes = {dispatcher: React.PropTypes.any}
+
+
+export class View extends ViewBase {
+  static get contextTypes() {
+    return AmamoriViewContextTypes;
+  }
+}
+
+
+export class RootView extends ViewBase {
+  static get childContextTypes() {
+    return AmamoriViewContextTypes;
+  }
+
+  getChildContext() {
+    return {dispatcher: this.props.dispatcher};
   }
 }
