@@ -4,8 +4,9 @@ import {getAuthToken, isTokenValid} from './util/auth';
 
 
 export function EventHandler(func) {
-  return (ctx, component) => {
+  return (component) => {
     return (...args) => {
+      const ctx = component.props.dispatcher || component.context.dispatcher;
       return func.call('do not use "this"', ctx, component.props, component.state, ...args);
     };
   };
