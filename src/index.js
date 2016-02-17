@@ -1,6 +1,6 @@
 import {EventHandler} from './action';
 import CreateDispatcher from './dispatcher';
 import Store from './store';
-import {View} from './view';
+import {Component, AppContextProvider} from './component';
 
-export {EventHandler, CreateDispatcher, Store, View};
+export {EventHandler, CreateDispatcher, Store, Component, AppContextProvider};
