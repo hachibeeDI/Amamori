@@ -3,13 +3,52 @@ import axios from 'axios';
 import {getAuthToken, isTokenValid} from './util/auth';
 
 
+// TODO: いちいち引数にコンポーネントを明示的に渡さないといけないのはダサい
+
+
+/**
+ * make a event handlable function which can take any arguments.
+ * Example:
+ *    handleHoge: EventHandler((ctx, props, state, ev) => { // blabla })
+ *
+ *    // in render
+ *    <input onChange={act.handleHoge(this)} />
+ */
 export function EventHandler(func) {
-  return (component) => {
+  return component => {
     return (...args) => {
       const ctx = component.props.dispatcher || component.context.dispatcher;
-      return func.call('do not use "this"', ctx, component.props, component.state, ...args);
+      return func.call(
+        'do not use "this"',
+        ctx,
+        component.props,
+        component.state,
+        ...args
+      );
     };
   };
+}
+
+
+/**
+ * make a event handlable function which can take any arguments.
+ * Example:
+ *    setupHoge: Executor((ctx, props, state, url, val) => {
+ *
+ *    // somewhere like componentWillMount
+ *    act.setupHoge(this, '/api/hoge', {hoge: 1})
+ */
+export function Executor(func) {
+  return (component, ...args) => {
+    const ctx = component.props.dispatcher || component.context.dispatcher;
+    return func.call(
+      'do not use "this"',
+      ctx,
+      component.props,
+      component.state,
+      ...args
+    )
+  }
 }
 
 
