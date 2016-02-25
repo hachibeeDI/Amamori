@@ -54,7 +54,7 @@ export class Component extends ComponentBase {
 
   constructor(props) {
     super(props)
-    store = {}
+    this.store = {}
   }
 
   componentWillMount() {
