@@ -49,6 +49,35 @@ export class Component extends ComponentBase {
   static get contextTypes() {
     return AmamoriComponentContextTypes;
   }
+
+  static get storeTypes() { return null }
+
+  constructor(props) {
+    super(props)
+    store = {}
+  }
+
+  componentWillMount() {
+    // Why we don't initialize stores in constructor because of context would not initialized in constructor.
+    if (this.constructor.storeTypes) {
+      this.constructor.storeTypes
+        .map(Store => {
+          // NOTE: Store should have "Store" in its name on postfix
+          const store = this.createStore(Store)
+          const [_, storePrefix] = Store.name.match(/(.+)Store$/)
+          return [storePrefix.toLowerCase(), store]
+        })
+        .map(kv => {
+          const [k, v] = kv
+          this.observe(v).on(subscribe => {
+            subscribe('initialized', state => this.setState({[k]: state}))
+            subscribe('changed', state => this.setState({[k]: state}))
+          })
+          this.store[k] = v
+        })
+    }
+  }
+
 }
 
 
