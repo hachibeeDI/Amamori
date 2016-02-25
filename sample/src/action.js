@@ -8,7 +8,8 @@ const ActionCreator = {
       .resolve({todo: [
         {id: 1, title: 'default', content: 'hogehogehoeg'}
       ]})
-      .then(data => ctx.emit('initialize', data))
+      .then(data => ctx.emit('todo:initialize', data))
+    ctx.emit('newtodo:initialize', {title: '', content: ''})
   }),
 
   handleNewTodoChanges: EventHandler((ctx, props, state, ev) => {
