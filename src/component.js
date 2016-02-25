@@ -52,9 +52,14 @@ export class Component extends ComponentBase {
 
   static get storeTypes() { return null }
 
+  get isStoresInitialized() {
+    return Object.keys(this.store).length === this.__initializedCount
+  }
+
   constructor(props) {
     super(props)
     this.store = {}
+    this.__initializedCount = 0
   }
 
   componentWillMount() {
@@ -70,7 +75,12 @@ export class Component extends ComponentBase {
         .map(kv => {
           const [k, v] = kv
           this.observe(v).on(subscribe => {
-            subscribe('initialized', state => this.setState({[k]: state}))
+            subscribe('initialized', state => {
+              this.setState((previousState, currentProps) => {
+                this.__initializedCount += 1
+                return {[k]: state}
+              })
+            })
             subscribe('changed', state => this.setState({[k]: state}))
           })
           this.store[k] = v
