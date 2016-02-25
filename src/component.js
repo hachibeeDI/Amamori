@@ -69,8 +69,7 @@ export class Component extends ComponentBase {
         .map(Store => {
           // NOTE: Store should have "Store" in its name on postfix
           const store = this.createStore(Store)
-          const [_, storePrefix] = Store.name.match(/(.+)Store$/)
-          return [storePrefix.toLowerCase(), store]
+          return [store.label, store]
         })
         .map(kv => {
           const [k, v] = kv

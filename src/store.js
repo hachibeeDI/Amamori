@@ -15,15 +15,20 @@ export default class Store extends EventEmitter {
   get state() { return this._state }
   set state(s) {this._state = s}
 
+  get label() { return this._label }
+
   /**
    * @param {flux.Dispactcher} dispatcher dispatcher
    * @returns {void}
    */
   constructor(dispatcher) {
     super();
+    const [_, storePrefix] = this.constructor.name.match(/(.+)Store$/)
+    this._label = storePrefix.toLowerCase()
+
     this.dispatcher = dispatcher;
     const d = this.dispatcher;
-    d.on('initialize', data => {
+    d.on(`${this._label}:initialize`, data => {
       this.state = new this.constructor.stateType(this.initializeState(data))
       this.emit('initialized', this.state)
     })
