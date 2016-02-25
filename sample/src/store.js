@@ -4,35 +4,34 @@ import Immutable from 'immutable'
 const TodoRecord = Immutable.Record({title: '', content: ''})
 
 
-export default class TodoStore extends Store {
+export class NewTodoStore extends Store {
+  static get stateType() { return TodoRecord }
 
-  constructor(dispatcher) {
-    super(dispatcher)
-    this.todo;
-    this.newtodo = new TodoRecord({})
-
-    this.observe(subscribe => {
-      subscribe('initialize', val => {
-        this.todo = Immutable.List(val.todo)
-        this.emit('initialized', this)
-      })
-      subscribe('newtodo:title:changes', val => {
-        this.setTodo(val, this.newtodo.get('content'))
-        this.emit('newtodo:edit', this)
-      })
-      subscribe('newtodo:content:changes', val => {
-        this.setTodo(this.newtodo.get('title'), val)
-        this.emit('newtodo:edit', this)
-      })
-      subscribe('newtodo:submit', newtodo => {
-        this.todo = this.todo.push(newtodo.toJS())
-        this.setTodo('', '')
-        this.emit('newtodo:submit', this)
+  observeres(subscribe) {
+    subscribe('newtodo:title:changes', val => {
+      this.update(state => state.set('title', val))
+    })
+    subscribe('newtodo:content:changes', val => {
+      this.update(state => state.set('content', val))
+    })
+    subscribe('newtodo:submit', newtodo => {
+      this.update(state => {
+        state.set('title', '')
+        state.set('content', '')
       })
     })
   }
+}
 
-  setTodo(title, content) {
-    this.newtodo = new TodoRecord({title, content})
+
+export class TodoStore extends Store {
+  static get stateType() { return Immutable.Record({todo: Immutable.List()}) }
+
+  observeres(subscribe) {
+    subscribe('newtodo:submit', newtodo => {
+      this.update(state => {
+        state.todo.push(newtodo.toJS())
+      })
+    })
   }
 }

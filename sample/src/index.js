@@ -1,12 +1,9 @@
 import React from 'react'
 import {render} from 'react-dom'
-import {CreateDispatcher, View} from 'amamori'
+import {CreateDispatcher, AppContextProvider, Component} from 'amamori'
 
-import TodoStore from './store'
+import {NewTodoStore, TodoStore} from './store'
 import ActionCreator from './action'
-
-
-const Dispatcher = CreateDispatcher('todo');
 
 
 const Todo = props => {
@@ -21,47 +18,36 @@ const Todo = props => {
 }
 
 
-class TodoView extends View {
-  constructor(props) {
-    super(props)
-    this.state = {
-      todo: [],
-      newtodo: {},
-    }
-    const store = new TodoStore(Dispatcher)
-    this.observe(store)
-      .on(subscribe => {
-        subscribe('initialized', store => this.apply(store))
-        subscribe('newtodo:edit', store => this.setState({newtodo: store.newtodo}))
-        subscribe('newtodo:submit', store => this.apply(store))
-      })
-  }
-
-  apply(store) {
-    const {todo, newtodo} = store
-    this.setState({todo, newtodo})
-  }
+class TodoView extends Component {
+  static get storeTypes() { return [NewTodoStore, TodoStore] }
 
   componentDidMount() {
-    ActionCreator.initialize(Dispatcher)
+    ActionCreator.initialize(this)
   }
 
   render() {
-    const todoElements = this.state.todo.map((t, i) => <Todo key={i} {...t} />)
-    const handleEdit = ActionCreator.handleNewTodoChanges(Dispatcher, this)
+    console.log(this.state)
+    console.log(this.__initializedCount)
+    if (!this.isStoresInitialized) return (<section />)
+
+    const {todo, newtodo} = this.state
+    console.log(todo, newtodo)
+    console.log(todo.get('todo'))
+    const todoElements = todo.get('todo').map((t, i) => <Todo key={i} {...t} />)
+    const handleEdit = ActionCreator.handleNewTodoChanges(this)
     return (
       <section>
-        <form onSubmit={ActionCreator.handleTodoAdd(Dispatcher, this)}>
+        <form onSubmit={ActionCreator.handleTodoAdd(this)}>
           <input
             type="text"
             name="title"
-            value={this.state.newtodo.title}
+            value={newtodo.get('title')}
             onChange={handleEdit} />
           <textarea
             name="content"
             cols="30"
             rows="5"
-            value={this.state.newtodo.content}
+            value={newtodo.get('content')}
             onChange={handleEdit} />
           <button type="submit">add</button>
         </form>
@@ -72,6 +58,13 @@ class TodoView extends View {
 }
 
 
+const Dispatcher = CreateDispatcher('todo');
+class RootContainer extends AppContextProvider { }
+
 document.addEventListener('DOMContentLoaded', e => {
-  render(<TodoView />, document.getElementById('amamori'));
+  render(
+    <RootContainer dispatcher={Dispatcher}>
+      <TodoView />
+    </RootContainer>
+    , document.getElementById('amamori'));
 });
