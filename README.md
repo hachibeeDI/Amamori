@@ -19,13 +19,10 @@ Component
 
 import React from 'react'
 import {render} from 'react-dom'
-import {CreateDispatcher, View} from 'amamori'
+import {CreateDispatcher, AppContextProvider, Component} from 'amamori'
 
-import TodoStore from './store'
+import {NewTodoStore, TodoStore} from './store'
 import ActionCreator from './action'
-
-
-const Dispatcher = CreateDispatcher('todo');
 
 
 const Todo = props => {
@@ -40,47 +37,36 @@ const Todo = props => {
 }
 
 
-class TodoView extends View {
-  constructor(props) {
-    super(props)
-    this.state = {
-      todo: [],
-      newtodo: {},
-    }
-    const store = new TodoStore(Dispatcher)
-    this.observe(store)
-      .on(subscribe => {
-        subscribe('initialized', store => this.apply(store))
-        subscribe('newtodo:edit', store => this.setState({newtodo: store.newtodo}))
-        subscribe('newtodo:submit', store => this.apply(store))
-      })
-  }
-
-  apply(store) {
-    const {todo, newtodo} = store
-    this.setState({todo, newtodo})
-  }
+class TodoView extends Component {
+  static get storeTypes() { return [NewTodoStore, TodoStore] }
 
   componentDidMount() {
-    ActionCreator.initialize(Dispatcher)
+    ActionCreator.initialize(this)
   }
 
   render() {
-    const todoElements = this.state.todo.map((t, i) => <Todo key={i} {...t} />)
-    const handleEdit = ActionCreator.handleNewTodoChanges(Dispatcher, this)
+    console.log(this.state)
+    console.log(this.__initializedCount)
+    if (!this.isStoresInitialized) return (<section />)
+
+    const {todo, newtodo} = this.state
+    console.log(todo, newtodo)
+    console.log(todo.get('todo'))
+    const todoElements = todo.get('todo').map((t, i) => <Todo key={i} {...t} />)
+    const handleEdit = ActionCreator.handleNewTodoChanges(this)
     return (
       <section>
-        <form onSubmit={ActionCreator.handleTodoAdd(Dispatcher, this)}>
+        <form onSubmit={ActionCreator.handleTodoAdd(this)}>
           <input
             type="text"
             name="title"
-            value={this.state.newtodo.title}
+            value={newtodo.get('title')}
             onChange={handleEdit} />
           <textarea
             name="content"
             cols="30"
             rows="5"
-            value={this.state.newtodo.content}
+            value={newtodo.get('content')}
             onChange={handleEdit} />
           <button type="submit">add</button>
         </form>
@@ -91,8 +77,15 @@ class TodoView extends View {
 }
 
 
+const Dispatcher = CreateDispatcher('todo');
+class RootContainer extends AppContextProvider { }
+
 document.addEventListener('DOMContentLoaded', e => {
-  render(<TodoView />, document.getElementById('amamori'));
+  render(
+    <RootContainer dispatcher={Dispatcher}>
+      <TodoView />
+    </RootContainer>
+    , document.getElementById('amamori'));
 });
 
 ```
@@ -102,73 +95,77 @@ ActionCreator
 
 ```javascript
 
-import {EventHandler, } from 'amamori';
+import {EventHandler, Executor} from 'amamori';
 
 
 const ActionCreator = {
-  initialize(ctx) {
+  initialize: Executor((ctx, props, state) => {
     // ajaxのかわり
     Promise
       .resolve({todo: [
         {id: 1, title: 'default', content: 'hogehogehoeg'}
       ]})
-      .then(data => ctx.emit('initialize', data))
-  },
+      .then(data => ctx.emit('todo:initialize', data))
+    ctx.emit('newtodo:initialize', {title: '', content: ''})
+  }),
 
   handleNewTodoChanges: EventHandler((ctx, props, state, ev) => {
+    console.log(ctx, state);
     const targ = ev.currentTarget || ev.target
     ctx.emit(`newtodo:${targ.name}:changes`, targ.value)
   }),
 
   handleTodoAdd: EventHandler((ctx, props, state, ev) => {
+    console.log(ctx, state);
     ev.preventDefault()
     ctx.emit('newtodo:submit', state.newtodo)
   }),
 }
 
 export default ActionCreator
+
 ```
 
 Store
 
 ```javascript
 
-import {Store} from 'amamori';
+import {Store} from 'amamori'
 import Immutable from 'immutable'
 
 const TodoRecord = Immutable.Record({title: '', content: ''})
 
 
-export default class TodoStore extends Store {
+export class NewTodoStore extends Store {
+  static get stateType() { return TodoRecord }
 
-  constructor(dispatcher) {
-    super(dispatcher)
-    this.todo;
-    this.newtodo = new TodoRecord({})
-
-    this.observe(subscribe => {
-      subscribe('initialize', val => {
-        this.todo = Immutable.List(val.todo)
-        this.emit('initialized', this)
-      })
-      subscribe('newtodo:title:changes', val => {
-        this.setTodo(val, this.newtodo.get('content'))
-        this.emit('newtodo:edit', this)
-      })
-      subscribe('newtodo:content:changes', val => {
-        this.setTodo(this.newtodo.get('title'), val)
-        this.emit('newtodo:edit', this)
-      })
-      subscribe('newtodo:submit', newtodo => {
-        this.todo = this.todo.push(newtodo.toJS())
-        this.setTodo('', '')
-        this.emit('newtodo:submit', this)
+  observeres(subscribe) {
+    subscribe('newtodo:title:changes', val => {
+      this.update(state => state.set('title', val))
+    })
+    subscribe('newtodo:content:changes', val => {
+      this.update(state => state.set('content', val))
+    })
+    subscribe('newtodo:submit', newtodo => {
+      this.update(state => {
+        state.set('title', '')
+        state.set('content', '')
       })
     })
   }
+}
 
-  setTodo(title, content) {
-    this.newtodo = new TodoRecord({title, content})
+
+export class TodoStore extends Store {
+  static get stateType() { return Immutable.Record({todo: Immutable.List()}) }
+
+  observeres(subscribe) {
+    subscribe('newtodo:submit', newtodo => {
+      this.update(state => {
+        state.todo.push(newtodo.toJS())
+      })
+    })
   }
 }
+
 ```
