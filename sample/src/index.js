@@ -25,11 +25,9 @@ class TodoView extends Component {
     ActionCreator.initialize(this)
   }
 
-  render() {
-    console.log(this.state)
-    console.log(this.__initializedCount)
-    if (!this.isStoresInitialized) return (<section />)
+  loadingView() { return (<div>loading... ...</div>) }
 
+  view() {
     const {todo, newtodo} = this.state
     console.log(todo, newtodo)
     console.log(todo.get('todo'))

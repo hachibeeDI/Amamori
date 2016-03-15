@@ -6,6 +6,13 @@ const TodoRecord = Immutable.Record({title: '', content: ''})
 
 export class NewTodoStore extends Store {
   static get stateType() { return TodoRecord }
+  static get logger() {
+    return {
+      debug(...msg) { console.log(...msg) },
+      info(...msg) { console.log(...msg) },
+      warn(...msg) { console.warn(...msg) },
+    }
+  }
 
   observeres(subscribe) {
     subscribe('newtodo:title:changes', val => {
@@ -26,6 +33,13 @@ export class NewTodoStore extends Store {
 
 export class TodoStore extends Store {
   static get stateType() { return Immutable.Record({todo: Immutable.List()}) }
+  static get logger() {
+    return {
+      debug(...msg) { console.log(...msg) },
+      info(...msg) { console.log(...msg) },
+      warn(...msg) { console.warn(...msg) },
+    }
+  }
 
   observeres(subscribe) {
     subscribe('newtodo:submit', newtodo => {

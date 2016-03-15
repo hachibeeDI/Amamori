@@ -27,7 +27,7 @@
     "browserify-shim": "^3.8.12"
   },
   "dependencies": {
-    "amamori": "0.0.9",
+    "amamori": "0.1.0",
     "immutable": "^3.7.6",
     "react": "^0.14.7",
     "react-dom": "^0.14.7"
