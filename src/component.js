@@ -87,6 +87,31 @@ export class Component extends ComponentBase {
     }
   }
 
+  render() {
+    if (!this.isStoresInitialized) {
+      return this.loadingView()
+    }
+    else {
+      return this.view()
+    }
+  }
+
+  /**
+   * @override
+   */
+  loadingView() {
+    // default
+    return React.createElement('div')
+  }
+
+  /**
+   * @override
+   */
+  view() {
+    // default
+    return React.createElement('div')
+  }
+
 }
 
 
