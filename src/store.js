@@ -12,10 +12,30 @@ export default class Store extends EventEmitter {
     return Object
   }
 
+  /**
+   * @override
+   * I recommend to use Logger by js-logger
+   */
+  static get logger() {
+    return null
+  }
+
   get state() { return this._state }
   set state(s) {this._state = s}
 
   get label() { return this._label }
+
+  _initializeLogger(logger) {
+    if (logger == null) {
+      this._logger = {
+        debug(...msg) { },
+        info(...msg) { },
+        warn(...msg) { },
+      }
+      return
+    }
+    this._logger = logger
+  }
 
   /**
    * @param {flux.Dispactcher} dispatcher dispatcher
@@ -25,15 +45,19 @@ export default class Store extends EventEmitter {
     super();
     const [_, storePrefix] = this.constructor.name.match(/(.+)Store$/)
     this._label = storePrefix.toLowerCase()
+    this._initializeLogger(this.constructor.logger)
+    this._logger.info(`${this._label} is initializing`)
 
     this.dispatcher = dispatcher;
     const d = this.dispatcher;
     d.on(`${this._label}:initialize`, data => {
+      this._logger.debug('initialize', data)
       this.state = new this.constructor.stateType(this.initializeState(data))
       this.emit('initialized', this.state)
     })
     d.on('error', response => {
-      this.emit('onError', response);
+      this._logger.warn(response)
+      this.emit('onError', response)
     });
     d.on('loginSuspend', e => {
       clearAuthToken();
@@ -49,7 +73,7 @@ export default class Store extends EventEmitter {
    * this method is called once by 'initialize' event
    * overridable
    * @param {T} data state
-   * @returns {void}
+   * @returns {T}
    */
   initializeState(action) { return action }
 
@@ -58,9 +82,12 @@ export default class Store extends EventEmitter {
    * @returns {void}
    */
   update(updater) {
+    this._logger.info('preUpdate', this.state)
+
     const before = this.state
     const after = before.withMutations(updater)
     if (before !== after) {
+      this._logger.info('updated', after)
       this.state = after
       return this.emit('changed', this.state)
     }
