@@ -50,7 +50,7 @@ export default class Store extends EventEmitter {
 
     this.dispatcher = dispatcher;
     const d = this.dispatcher;
-    d.on(`${this._label}:initialize`, data => {
+    d.once(`${this._label}:initialize`, data => {
       this._logger.debug('initialize', data)
       this.state = new this.constructor.stateType(this.initializeState(data))
       this.emit('initialized', this.state)
@@ -59,7 +59,7 @@ export default class Store extends EventEmitter {
       this._logger.warn(response)
       this.emit('onError', response)
     });
-    d.on('loginSuspend', e => {
+    d.once('loginSuspend', e => {
       clearAuthToken();
       window.sessionStorage.setItem('lastLocation', window.location.pathname);
       this.emit('loginSuspend');
