@@ -113,4 +113,14 @@ export default class Store extends EventEmitter {
    */
   observeres(subscribe) {
   }
+
+  dispose() {
+    this._callbacks.forEach(([k, f]) => {
+      this.dispatcher.removeListener(k, f)
+      f = null
+    })
+    this.removeAllListeners()
+    this.dispatcher = null
+    this.state = null
+  }
 }
