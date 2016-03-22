@@ -37,6 +37,7 @@ export default class Store extends EventEmitter {
     this._logger = logger
   }
 
+
   /**
    * @param {flux.Dispactcher} dispatcher dispatcher
    * @returns {void}
@@ -50,21 +51,27 @@ export default class Store extends EventEmitter {
 
     this.dispatcher = dispatcher;
     const d = this.dispatcher;
-    d.on(`${this._label}:initialize`, data => {
+    d.once(`${this._label}:initialize`, data => {
       this._logger.debug('initialize', data)
       this.state = new this.constructor.stateType(this.initializeState(data))
       this.emit('initialized', this.state)
     })
-    d.on('error', response => {
+
+    this._callbacks = [];
+    const subscriber = (type, callback) => {
+      d.on(type, callback)
+      this._callbacks.push([type, callback])
+    }
+    this.observeres(subscriber)
+    subscriber('error', response => {
       this._logger.warn(response)
       this.emit('onError', response)
     });
-    d.on('loginSuspend', e => {
+    subscriber('loginSuspend', e => {
       clearAuthToken();
       window.sessionStorage.setItem('lastLocation', window.location.pathname);
       this.emit('loginSuspend');
     });
-    this.observeres(d.on.bind(d))
 
     this._state = new (this.constructor.stateType)()  // default state
   }
@@ -107,14 +114,13 @@ export default class Store extends EventEmitter {
   observeres(subscribe) {
   }
 
-  /**
-   * @param {function(subscribe:function(name:string, listener:function(...any)))} func subscriber which is observe the dispatcher events.
-   * @returns {Store}
-   * @deprecated
-   */
-  observe(func) {
-    const d = this.dispatcher;
-    func(d.on.bind(d));
-    return this;
+  dispose() {
+    this._callbacks.forEach(([k, f]) => {
+      this.dispatcher.removeListener(k, f)
+      f = null
+    })
+    this.removeAllListeners()
+    this.dispatcher = null
+    this.state = null
   }
 }

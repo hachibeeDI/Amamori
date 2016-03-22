@@ -87,6 +87,17 @@ export class Component extends ComponentBase {
     }
   }
 
+  componentWillUnmount() {
+    const store = this.store
+    for (let key in this.store) {
+       if (store.hasOwnProperty(key)) {
+         store[key].dispose()
+         store[key] = null
+       }
+    }
+    delete this.store
+  }
+
   render() {
     if (!this.isStoresInitialized) {
       return this.loadingView()
