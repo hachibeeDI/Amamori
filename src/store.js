@@ -106,15 +106,4 @@ export default class Store extends EventEmitter {
    */
   observeres(subscribe) {
   }
-
-  /**
-   * @param {function(subscribe:function(name:string, listener:function(...any)))} func subscriber which is observe the dispatcher events.
-   * @returns {Store}
-   * @deprecated
-   */
-  observe(func) {
-    const d = this.dispatcher;
-    func(d.on.bind(d));
-    return this;
-  }
 }
