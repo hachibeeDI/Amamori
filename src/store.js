@@ -37,6 +37,7 @@ export default class Store extends EventEmitter {
     this._logger = logger
   }
 
+
   /**
    * @param {flux.Dispactcher} dispatcher dispatcher
    * @returns {void}
@@ -55,16 +56,22 @@ export default class Store extends EventEmitter {
       this.state = new this.constructor.stateType(this.initializeState(data))
       this.emit('initialized', this.state)
     })
-    d.on('error', response => {
+
+    this._callbacks = [];
+    const subscriber = (type, callback) => {
+      d.on(type, callback)
+      this._callbacks.push([type, callback])
+    }
+    this.observeres(subscriber)
+    subscriber('error', response => {
       this._logger.warn(response)
       this.emit('onError', response)
     });
-    d.once('loginSuspend', e => {
+    subscriber('loginSuspend', e => {
       clearAuthToken();
       window.sessionStorage.setItem('lastLocation', window.location.pathname);
       this.emit('loginSuspend');
     });
-    this.observeres(d.on.bind(d))
 
     this._state = new (this.constructor.stateType)()  // default state
   }
