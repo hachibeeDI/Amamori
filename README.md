@@ -1,6 +1,6 @@
 # Amamori
 
-A Gauche Flux Framework.
+Minimal Flux Framework.
 
 
 ## Overview
@@ -11,161 +11,86 @@ ActionCreator is just functions.
 Store is just a class inherits EventEmitter.
 
 
-## Example
+## API
 
-Component
+### Dispatcher and AppContextProvider
+
+Dispatcher provides a context between Component relationship with parent and child, and flux elements. This is just a EventEmitter.
+
+AppContextProvider is Container to pass the Dispatcher to child Components.
 
 ```javascript
+// example
 
-import React from 'react'
-import {render} from 'react-dom'
-import {CreateDispatcher, AppContextProvider, Component} from 'amamori'
-
-import {NewTodoStore, TodoStore} from './store'
-import ActionCreator from './action'
-
-
-const Todo = props => {
-  return (
-    <li>
-      <article>
-        <h5>Title: {props.title}</h5>
-        <p>{props.content}</p>
-      </article>
-    </li>
-  );
-}
-
-
-class TodoView extends Component {
-  static get storeTypes() { return [NewTodoStore, TodoStore] }
-
-  componentDidMount() {
-    ActionCreator.initialize(this)
-  }
-
-  render() {
-    console.log(this.state)
-    console.log(this.__initializedCount)
-    if (!this.isStoresInitialized) return (<section />)
-
-    const {todo, newtodo} = this.state
-    console.log(todo, newtodo)
-    console.log(todo.get('todo'))
-    const todoElements = todo.get('todo').map((t, i) => <Todo key={i} {...t} />)
-    const handleEdit = ActionCreator.handleNewTodoChanges(this)
-    return (
-      <section>
-        <form onSubmit={ActionCreator.handleTodoAdd(this)}>
-          <input
-            type="text"
-            name="title"
-            value={newtodo.get('title')}
-            onChange={handleEdit} />
-          <textarea
-            name="content"
-            cols="30"
-            rows="5"
-            value={newtodo.get('content')}
-            onChange={handleEdit} />
-          <button type="submit">add</button>
-        </form>
-        {todoElements}
-      </section>
-    )
-  }
-}
-
-
-const Dispatcher = CreateDispatcher('todo');
+const Dispatcher = CreateDispatcher('todo')
 class RootContainer extends AppContextProvider { }
 
 document.addEventListener('DOMContentLoaded', e => {
   render(
     <RootContainer dispatcher={Dispatcher}>
-      <TodoView />
+      <SomeNiceComponent />
     </RootContainer>
-    , document.getElementById('amamori'));
-});
+    , document.getElementById('amamori-example'))
+})
 
 ```
 
 
-ActionCreator
+### Component
+
+Component extends React.Component.
+
+You can declare the stores as static method names `storeTypes`.  
+Every store will attach components state automatically.
+
+You'll basically implement the logic to initialize on `componentDidMount`. If you'd like to use `componentWillMount` don't forget to call super function.
+
+You might want to use `loadingView` and `view` method instead of render. `loadingView` will called when declared stores in initializing.
 
 ```javascript
+// example
 
-import {EventHandler, Executor} from 'amamori';
+class HogeComponent extends Component {
+  static get storeTypes() { return [SomeNiceStore] }
 
+  componentDidMount() {
+    ActionCreator.initialize(this)
+  }
 
-const ActionCreator = {
-  initialize: Executor((ctx, props, state) => {
-    // ajaxのかわり
-    Promise
-      .resolve({todo: [
-        {id: 1, title: 'default', content: 'hogehogehoeg'}
-      ]})
-      .then(data => ctx.emit('todo:initialize', data))
-    ctx.emit('newtodo:initialize', {title: '', content: ''})
-  }),
+  loadingView() {
+    return (<div>now loading...</div>)
+  }
 
-  handleNewTodoChanges: EventHandler((ctx, props, state, ev) => {
-    console.log(ctx, state);
-    const targ = ev.currentTarget || ev.target
-    ctx.emit(`newtodo:${targ.name}:changes`, targ.value)
-  }),
-
-  handleTodoAdd: EventHandler((ctx, props, state, ev) => {
-    console.log(ctx, state);
-    ev.preventDefault()
-    ctx.emit('newtodo:submit', state.newtodo)
-  }),
+  view() {
+    return (<div>{this.state.somenice.greet}</div>)
+  }
 }
 
-export default ActionCreator
-
 ```
 
-Store
+
+### Store
 
 ```javascript
 
-import {Store} from 'amamori'
-import Immutable from 'immutable'
-
-const TodoRecord = Immutable.Record({title: '', content: ''})
+const NiceRecord = Immutable.Record({greet: '', name: ''})
 
 
 export class NewTodoStore extends Store {
-  static get stateType() { return TodoRecord }
+  static get stateType() { return NiceRecord }
 
   observeres(subscribe) {
-    subscribe('newtodo:title:changes', val => {
-      this.update(state => state.set('title', val))
-    })
-    subscribe('newtodo:content:changes', val => {
-      this.update(state => state.set('content', val))
-    })
-    subscribe('newtodo:submit', newtodo => {
-      this.update(state => {
-        state.set('title', '')
-        state.set('content', '')
-      })
-    })
-  }
-}
-
-
-export class TodoStore extends Store {
-  static get stateType() { return Immutable.Record({todo: Immutable.List()}) }
-
-  observeres(subscribe) {
-    subscribe('newtodo:submit', newtodo => {
-      this.update(state => {
-        state.todo.push(newtodo.toJS())
-      })
+    subscribe('newtodo:content:changes', (key, value) => {
+      this.update(state => state.set(key, value))
     })
   }
 }
 
 ```
+
+
+### ActionCreator
+
+// writing
+
+
