@@ -30,7 +30,5 @@
     "babel-preset-es2015": "^6.3.13"
   },
   "dependencies": {
-    "axios": "^0.9.0",
-    "jwt-decode": "^1.5.1"
   }
 }
