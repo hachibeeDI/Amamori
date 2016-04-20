@@ -10,19 +10,38 @@
  *    // in render
  *    <input onChange={act.handleHoge(this)} />
  */
-export function EventHandler(func) {
-  return component => {
-    return (...args) => {
-      const ctx = component.props.dispatcher || component.context.dispatcher;
-      return func.call(
-        'do not use "this"',
-        ctx,
-        component.props,
-        component.state,
-        ...args
-      );
-    };
-  };
+export function EventHandler(...handlers) {
+  let [middlewares, func] = handlers
+  if (func) {
+    return component => {
+      return (...args) => {
+        const ctx = component.props.dispatcher || component.context.dispatcher;
+        const filterdArgs = middlewares.reduce((result, middle) => {return middle(...result)}, args);
+        return func.call(
+          'do not use "this"',
+          ctx,
+          component.props,
+          component.state,
+          ...filterdArgs
+        )
+      }
+    }
+  }
+  else {
+    func = middlewares
+    return component => {
+      return (...args) => {
+        const ctx = component.props.dispatcher || component.context.dispatcher;
+        return func.call(
+          'do not use "this"',
+          ctx,
+          component.props,
+          component.state,
+          ...args
+        )
+      }
+    }
+  }
 }
 
 
@@ -33,17 +52,49 @@ export function EventHandler(func) {
  *
  *    // somewhere like componentWillMount
  *    act.setupHoge(this, '/api/hoge', {hoge: 1})
+ *
+ * doctest:
+ *  > var dammy = {props : {}, state: {}, context: {}}
+ *  > var Executor= require('./lib/action.js').Executor
+ *  > var hoge = Executor(function(ctx, props, state, x, y) {console.log(x,y)});
+ *  > hoge(dammy, 1, 2)
+ *  1 2
+ *  > var zoge = Executor([
+ *        function(foo, bar) { return [foo + bar, 'huga']},
+ *        function(a, b) { return [a + 10, b + '-hoge'] }
+ *      ],
+ *      function(ctx, props, state, x, y) {console.log(x,y)});
+ *  > zoge(dammy, 1, 2)
+ *  13 'huga-hoge'
+ *
  */
-export function Executor(func) {
-  return (component, ...args) => {
-    const ctx = component.props.dispatcher || component.context.dispatcher;
-    return func.call(
-      'do not use "this"',
-      ctx,
-      component.props,
-      component.state,
-      ...args
-    )
+export function Executor(...handlers) {
+  let [middlewares, func] = handlers
+  if (func) {
+    return (component, ...args) => {
+      const ctx = component.props.dispatcher || component.context.dispatcher;
+      const filterdArgs = middlewares.reduce((result, middle) => {return middle(...result)}, args);
+      return func.call(
+        'do not use "this"',
+        ctx,
+        component.props,
+        component.state,
+        ...filterdArgs
+      )
+    }
+  }
+  else {
+    func = middlewares
+    return (component, ...args) => {
+      const ctx = component.props.dispatcher || component.context.dispatcher;
+      return func.call(
+        'do not use "this"',
+        ctx,
+        component.props,
+        component.state,
+        ...args
+      )
+    }
   }
 }
 
