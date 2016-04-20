@@ -1,7 +1,3 @@
-import axios from 'axios';
-
-import {getAuthToken, isTokenValid} from './util/auth';
-
 
 // TODO: いちいち引数にコンポーネントを明示的に渡さないといけないのはダサい
 
@@ -49,21 +45,6 @@ export function Executor(func) {
       ...args
     )
   }
-}
-
-
-/**
- * @param {string} [baseURL=/api/] api baseURL
- * @param {string} [tokenField=X-Account-Token] http header field of authorization token
- * @returns {Tuple.<axios,Error>} axios and error
- */
-export function authorizedRequest(baseURL = '/api/', tokenField = 'X-Account-Token') {
-  const token = getAuthToken();
-  const [isValid, err] = isTokenValid(token);
-  if (!isValid) {
-    return [null, new Error(err)];
-  }
-  return [axios.create({baseURL: baseURL, headers: {[tokenField]: token}}), null];
 }
 
 

@@ -1,7 +1,5 @@
 import {EventEmitter} from 'events'
 
-import {clearAuthToken} from './util/auth'
-
 
 export default class Store extends EventEmitter {
   /**
@@ -66,11 +64,6 @@ export default class Store extends EventEmitter {
     subscriber('error', response => {
       this._logger.warn(response)
       this.emit('onError', response)
-    });
-    subscriber('loginSuspend', e => {
-      clearAuthToken();
-      window.sessionStorage.setItem('lastLocation', window.location.pathname);
-      this.emit('loginSuspend');
     });
 
     this._state = new (this.constructor.stateType)()  // default state
