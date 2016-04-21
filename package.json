@@ -6,6 +6,7 @@
   "scripts": {
     "compile": "babel --presets es2015 -d lib/ src/",
     "prepublish": "npm run compile",
+    "pretest": "npm run compile",
     "test": "$(npm bin)/mocha --compilers js:babel-register  --reporter dot -r spec/client/spec-helper.js --timeout 10000 --recursive spec/client/**/*-spec.js"
   },
   "repository": {
