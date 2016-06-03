@@ -13,7 +13,7 @@ describe("action", () => {
       hoge(ComponentDammy, 1, 2);
     });
 
-    it("with filter", () => {
+    it("with filters", () => {
       var hoge = Action.Executor([
         (x, y) => {
           assert.equal(x, 1);

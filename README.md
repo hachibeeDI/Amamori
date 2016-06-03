@@ -93,6 +93,51 @@ export class NewTodoStore extends Store {
 
 ### ActionCreator
 
-// writing
+ActionCreator is receive Dispatcher and cause Action, so That could be just plain function.  
+There is some helper for communicate with Component in Amamori.
+
+EventHandler, Executor will help you kick action and watch component event. Those will have middrewares.
 
 
+```javascript
+
+import {EventHandler, Executor} from 'amamori';
+
+
+// middleware sample
+const extractTarget = function (ev) {
+  return [ev.currentTarget || ev.target];
+}
+
+
+const preventBubling = function (ev) {
+  ev.preventDefault()
+  return [ev];
+}
+
+
+const ActionCreator = {
+  initialize: Executor((ctx, props, state) => {
+    // or some api call
+    Promise
+      .resolve({todo: [
+        {id: 1, title: 'default', content: 'hogehogehoeg'}
+      ]})
+      // ${lowered model name}:initialize will cause model initialization
+      .then(data => ctx.emit('todo:initialize', data))
+    ctx.emit('newtodo:initialize', {title: '', content: ''})
+  }),
+
+  handleNewTodoChanges: EventHandler([extractTarget], (ctx, props, state, targ) => {
+    ctx.emit(`newtodo:${targ.name}:changes`, targ.value)
+  }),
+
+  handleTodoAdd: EventHandler([preventBubling, extractTarget], (ctx, props, state, targ) => {
+    console.log(targ);  // we can use multiple middreware
+    ctx.emit('newtodo:submit', state.newtodo)
+  }),
+}
+
+export default ActionCreator
+
+```
