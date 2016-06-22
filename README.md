@@ -141,3 +141,17 @@ const ActionCreator = {
 export default ActionCreator
 
 ```
+
+
+## Dependency
+
+- React
+
+- Immutable.js
+
+
+### Recomend
+
+- react-router
+
+- axios
